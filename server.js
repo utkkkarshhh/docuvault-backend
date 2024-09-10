@@ -6,11 +6,12 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const userRoutes = require("./routes/userRouter/userRouter");
 const authRoutes = require("./routes/authRouter/authRouter");
-const otpRoutes = require("./routes/otpRouter/otpRouter");
+const documentRoutes = require("./routes/documentRouter/documentRouter");
 const db = require("./db/connectionPool");
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./utils/swagger/swagger");
 const { connectToSequelize } = require("./db/sequelizeConnection");
+const startNgrokTunnel = require("./utils/ngrok");
 
 // Middlewares
 const app = express();
@@ -21,7 +22,11 @@ app.use(cors());
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 connectToSequelize();
-env(); //Activatess env.config()
+env(); //Activates env.config()
+
+if (process.env.ENIVRONMENT == "NGROK") {
+  startNgrokTunnel(process.env.PORT);
+}
 
 // Swagger UI setup
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
@@ -34,10 +39,11 @@ app.get("/", (req, res) => {
 // Routes
 app.use("/api", userRoutes);
 app.use("/api/auth", authRoutes);
-app.use("/api/otp", otpRoutes);
-
+app.use("/api/doc", documentRoutes);
 // Listening to server
 const PORT = process.env.PORT;
 app.listen(PORT, () => {
-  console.log(`App is live on port ${PORT}`);
+  console.log(
+    `App is live on port http://localhost:${PORT} | Environment : ${process.env.ENIVRONMENT}`
+  );
 });

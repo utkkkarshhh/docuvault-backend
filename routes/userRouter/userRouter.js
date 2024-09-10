@@ -81,7 +81,7 @@ router.get("/user/:user_id", authenticateToken, usersController.getAUser);
  *       - in: path
  *         name: user_id
  *         required: true
- *         description: User ID (UUID)
+ *         description: The unique identifier of the user to be updated.
  *         schema:
  *           type: string
  *           format: uuid
@@ -90,16 +90,40 @@ router.get("/user/:user_id", authenticateToken, usersController.getAUser);
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/UserUpdate'
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: The name of the user.
+ *                 example: John Doe
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: The email address of the user.
+ *                 example: john.doe@example.com
+ *               bio:
+ *                 type: string
+ *                 description: A short biography about the user.
+ *                 example: A short biography about John Doe.
+ *               dob:
+ *                 type: string
+ *                 format: date
+ *                 description: The date of birth of the user.
+ *                 example: 1990-01-01
+ *             oneOf:
+ *               - required: [name]
+ *               - required: [email]
+ *               - required: [bio]
+ *               - required: [dob]
  *     responses:
  *       200:
- *         description: User updated
+ *         description: User successfully updated
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/User'
  *       400:
- *         description: Bad request, invalid input
+ *         description: Bad request, at least one field is required or validation errors
  *         content:
  *           application/json:
  *             schema:

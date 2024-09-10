@@ -51,46 +51,54 @@ const getAUser = async (req, res) => {
   }
 };
 
-// Update a user by ID
+//Update User
 const updateAUser = async (req, res) => {
   const { user_id } = req.params;
-  const { name, email } = req.body;
+  const { name, email, bio, dob } = req.body;
 
-  if (!name && !email) {
+  if (!name && !email && !bio && !dob) {
     return res.status(Constants.STATUS_CODES.BAD_REQUEST).json({
       error: Messages.VALIDATION.ONE_FIELD_REQUIRED,
     });
   }
 
   try {
-    const [updated] = await User.update(
-      { name, email },
+    const [updatedCount] = await User.update(
+      { name, email, bio, dob },
       {
         where: { user_id },
         returning: true,
+        plain: true, 
       }
     );
 
-    if (updated === 0) {
+    if (updatedCount === 0) {
       return res
         .status(Constants.STATUS_CODES.NOT_FOUND)
         .json({ error: Messages.USER.NO_USER_FOUND });
     }
 
     const updatedUser = await User.findByPk(user_id);
+
+    if (!updatedUser) {
+      return res
+        .status(Constants.STATUS_CODES.NOT_FOUND)
+        .json({ error: Messages.USER.NO_USER_FOUND });
+    }
+
     res.status(Constants.STATUS_CODES.OK).json(updatedUser);
   } catch (err) {
     console.error(Messages.GENERAL.ERROR_EXECUTING_QUERY, err.stack);
     if (err.name === "SequelizeUniqueConstraintError") {
-      res
+      return res
         .status(Constants.STATUS_CODES.BAD_REQUEST)
         .json({ error: Messages.VALIDATION.EMAIL_ALREADY_EXISTS });
     } else if (err.name === "SequelizeValidationError") {
-      res
+      return res
         .status(Constants.STATUS_CODES.BAD_REQUEST)
         .json({ error: Messages.VALIDATION.MISSING_REQUIRED_FIELDS });
     } else {
-      res
+      return res
         .status(Constants.STATUS_CODES.INTERNAL_SERVER_ERROR)
         .json({ error: Messages.GENERAL.INTERNAL_SERVER });
     }
