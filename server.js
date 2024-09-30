@@ -11,7 +11,7 @@ const db = require("./db/connectionPool");
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./utils/swagger/swagger");
 const { connectToSequelize } = require("./db/sequelizeConnection");
-const startNgrokTunnel = require("./utils/ngrok");
+const startNgrokTunnel = require("./utils/ngrok/ngrok");
 
 // Middlewares
 const app = express();
@@ -37,9 +37,10 @@ app.get("/", (req, res) => {
 });
 
 // Routes
-app.use("/api", userRoutes);
+app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/doc", documentRoutes);
+
 // Listening to server
 const PORT = process.env.PORT;
 app.listen(PORT, () => {

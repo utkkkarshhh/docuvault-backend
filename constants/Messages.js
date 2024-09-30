@@ -6,6 +6,7 @@ const Messages = {
   DATABASE: {
     CONNECTION_REFUSED: "Database connection refused.",
     TABLE_UNAVAILABLE: "Table does not exist.",
+    DATABASE_ERROR: "Database upload failed!"
   },
   USER: {
     NO_USERS_FOUND: "No users found.",

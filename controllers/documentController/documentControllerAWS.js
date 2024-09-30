@@ -11,9 +11,9 @@ const env = require("../../utils/dotenvConfig");
 
 env();
 app.use(express.json());
-const upload = multer({ storage: multer.memoryStorage() });
+const upload = multer({ storage: multer.memoryStorage() }).single("document");
 
-const uploadDocument = async (req, res) => {
+const uploadToAWS = async (req, res) => {
   const { name, description, type, user_id } = req.body;
   const file = req.file;
 
@@ -70,7 +70,7 @@ const uploadDocument = async (req, res) => {
   }
 };
 
-const downloadDocument = (req, res) => {
+const downloadFromAWS = (req, res) => {
   const { document_id } = req.body;
 
   if (!document_id) {
@@ -88,10 +88,10 @@ const downloadDocument = (req, res) => {
   }
 };
 
-const deleteDocument = (req, res) => {
+const deleteFromAWS = (req, res) => {
   const { document_id, user_id } = req.body;
   try {
   } catch (error) {}
 };
 
-module.exports = { uploadDocument, downloadDocument, deleteDocument };
+module.exports = { uploadToFirebase, downloadFromAWS, downloadFromAWS };

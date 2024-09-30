@@ -5,7 +5,7 @@ const authenticateToken = require("../../utils/authentication/authenticateToken"
 
 /**
  * @swagger
- * /api/users:
+ * /api/users/users:
  *   get:
  *     summary: Retrieve a list of users
  *     tags: [Users]
@@ -37,7 +37,7 @@ router.get("/users", authenticateToken, usersController.getAllUsers);
 
 /**
  * @swagger
- * /api/user/{user_id}:
+ * /api/users/user/{user_id}:
  *   get:
  *     summary: Retrieve a single user by ID
  *     tags: [Users]
@@ -73,7 +73,7 @@ router.get("/user/:user_id", authenticateToken, usersController.getAUser);
 
 /**
  * @swagger
- * /api/updateUser/{user_id}:
+ * /api/users/updateUser/{user_id}:
  *   put:
  *     summary: Update an existing user by ID
  *     tags: [Users]
@@ -145,7 +145,7 @@ router.put("/updateUser/:user_id", authenticateToken, usersController.updateAUse
 
 /**
  * @swagger
- * /api/deleteUser/{user_id}:
+ * /api/users/deleteUser/{user_id}:
  *   delete:
  *     summary: Delete a user by ID
  *     tags: [Users]
