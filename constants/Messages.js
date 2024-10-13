@@ -17,6 +17,7 @@ const Messages = {
   VALIDATION: {
     NAME_REQUIRED: "Name is required.",
     EMAIL_REQUIRED: "Email is required.",
+    EMAIL_OR_USERNAME_REQUIRED: "Email or Username Required.",
     NAME_EMAIL_REQUIRED: "Name and Email are required.",
     EMAIL_ALREADY_EXISTS: "Email already exists.",
     MISSING_REQUIRED_FIELDS: "Missing required fields.",

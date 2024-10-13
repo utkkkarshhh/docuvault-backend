@@ -7,7 +7,7 @@ const { sequelize } = require("../../db/sequelizeConnection");
 const Messages = require("../../constants/Messages");
 const Constant = require("../../constants/Constants");
 const User = require("../../models/users")(sequelize);
-const { Op } = require("sequelize");
+const { Op, Sequelize } = require("sequelize");
 
 app.use(express.json());
 
@@ -58,12 +58,24 @@ const registerUser = async (req, res) => {
 };
 
 const loginUser = async (req, res) => {
-  const { username, email, password } = req.body;
+  const { identifier, password } = req.body;
 
   try {
+    if (!identifier) {
+      return res.status(Constant.STATUS_CODES.BAD_REQUEST).json({
+        message: Messages.VALIDATION.IDENTIFIER_REQUIRED,
+        success: false,
+      });
+    }
+
+    const whereClause = {
+      [Sequelize.Op.or]: [{ username: identifier }, { email: identifier }],
+    };
+
     const user = await User.findOne({
-      where: { [Op.or]: [{ email }, { username }] },
+      where: whereClause,
     });
+
     if (!user) {
       return res
         .status(Constant.STATUS_CODES.NOT_FOUND)
@@ -84,13 +96,25 @@ const loginUser = async (req, res) => {
       { expiresIn: "1h" }
     );
 
-    return res.status(Constant.STATUS_CODES.OK).json({
-      message: Messages.VALIDATION.LOGIN_SUCCESSFUL,
-      success: true,
-      token: token,
+    res.cookie('access_token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 3600000
     });
+
+    return res
+      .status(Constant.STATUS_CODES.OK)
+      .json({
+        message: Messages.VALIDATION.LOGIN_SUCCESSFUL,
+        success: true,
+        user: {
+          user_id: user.user_id,
+          username: user.username,
+          email: user.email
+        },
+      });
   } catch (error) {
-    console.error("Error is LoginUser", error);
     res
       .status(Constant.STATUS_CODES.INTERNAL_SERVER_ERROR)
       .json({ message: Messages.GENERAL.INTERNAL_SERVER, success: false });
@@ -99,12 +123,10 @@ const loginUser = async (req, res) => {
 
 const logoutUser = async (req, res) => {
   try {
-    return res
-      .status(Constant.STATUS_CODES.OK)
-      .json({
-        message: Messages.VALIDATION.LOGOUT_SUCCESSFULLY,
-        success: false,
-      });
+    return res.status(Constant.STATUS_CODES.OK).json({
+      message: Messages.VALIDATION.LOGOUT_SUCCESSFULLY,
+      success: false,
+    });
   } catch (error) {
     console.error("Error in logoutUser:", error);
     res
