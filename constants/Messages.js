@@ -6,7 +6,7 @@ const Messages = {
   DATABASE: {
     CONNECTION_REFUSED: "Database connection refused.",
     TABLE_UNAVAILABLE: "Table does not exist.",
-    DATABASE_ERROR: "Database upload failed!"
+    DATABASE_ERROR: "Database upload failed!",
   },
   USER: {
     NO_USERS_FOUND: "No users found.",
@@ -34,15 +34,19 @@ const Messages = {
     NO_TOKEN: "Access Denied. No token found!",
     INVALID_TOKEN: "Access Denied. Invalid Token!",
   },
-  AWS: {
+  FIREBASE: {
     SUCCESS: {
       UPLOAD_SUCCESS: "File uploaded successfully",
+      DELETED_SUCCESS: "File deleted successfully",
+      FETCH_SUCCESS: "Retrieved user documents",
     },
     ERROR: {
       MISSING_FIELDS: "Missing required fields",
       UPLOAD_FAILED: "Failed to upload file",
       USER_NOT_FOUND: "User not found, Upload failed!",
-      UPLOAD_LIMIT: "Oops! You've reached your upload limit!"
+      DELETION_FALIED: "User not found, Deletion failed!",
+      UPLOAD_LIMIT: "Oops! You've reached your upload limit!",
+      USER_ID_DOES_NOT_MAPS: "Provided user_id does not maps to this document.",
     },
   },
 };

@@ -101,12 +101,9 @@ router.post("/signup", authController.registerUser);
  *           schema:
  *             type: object
  *             properties:
- *               username:
+ *               identifier:
  *                 type: string
- *                 example: existinguser
- *               email:
- *                 type: string
- *                 example: user@example.com
+ *                 example: Username or Email
  *               password:
  *                 type: string
  *                 example: securepassword
