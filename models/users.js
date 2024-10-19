@@ -1,4 +1,3 @@
-// models/users.js
 const { DataTypes } = require("sequelize");
 
 const User = (sequelize) => {
@@ -28,10 +27,33 @@ const User = (sequelize) => {
         type: DataTypes.STRING,
         allowNull: false,
       },
+      name: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      bio: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+      },
+      dob: {
+        type: DataTypes.DATEONLY,
+        allowNull: true,
+      },
+      limit: {
+        type: DataTypes.INTEGER,
+        defaultValue: 6,
+        allowNull: false,
+        validate: {
+          min: 0, 
+          max: 6, 
+        },
+      },
     },
     {
       tableName: "users",
       timestamps: true,
+      updatedAt: "updated_at",
+      createdAt: "created_at",
     }
   );
 };

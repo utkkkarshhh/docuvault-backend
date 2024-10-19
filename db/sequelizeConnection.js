@@ -17,7 +17,7 @@ const sequelize = new Sequelize(
 const connectToSequelize = async () => {
   try {
     await sequelize.authenticate();
-    console.log("Connection established with Postgres via Sequelize!");
+    console.log(`Connection established with Postgres via Sequelize on port: http://${process.env.DB_HOST}:${process.env.DB_PORT}`);
   } catch (error) {
     console.log("Error connecting to Postgres Database via Sequelize!", error);
   }
