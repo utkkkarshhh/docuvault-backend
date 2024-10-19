@@ -14,10 +14,7 @@ const Constants = {
   },
   AUTH: {
     SALT_ROUNDS: 10,
-  },
-  AWS: {
-    S3_BUCKET_NAME: process.env.S3_BUCKET_NAME,
-  },
+  }
 };
 
 module.exports = Constants;

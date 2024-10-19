@@ -1,6 +1,5 @@
-// Import the functions you need from the SDKs you need
 const { initializeApp } = require("firebase/app");
-const { getAnalytics } = require("firebase/analytics");
+const { getStorage } = require("firebase/storage");
 const env = require("../dotenvConfig");
 
 env();
@@ -15,5 +14,7 @@ const firebaseConfig = {
   measurementId: process.env.FIREBASE_MEASUREMENT_ID,
 };
 
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+const firebaseApp = initializeApp(firebaseConfig);
+const storage = getStorage(firebaseApp);
+
+module.exports = { firebaseApp, storage };
