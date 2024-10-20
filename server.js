@@ -7,7 +7,6 @@ const cors = require("cors");
 const userRoutes = require("./routes/userRouter/userRouter");
 const authRoutes = require("./routes/authRouter/authRouter");
 const documentRoutes = require("./routes/documentRouter/documentRouter");
-const db = require("./db/connectionPool");
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./utils/swagger/swagger");
 const { connectToSequelize } = require("./db/sequelizeConnection");
