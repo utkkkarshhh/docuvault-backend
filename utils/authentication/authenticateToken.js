@@ -3,8 +3,6 @@ const jwt = require("jsonwebtoken");
 const Constants = require("../../constants/Constants");
 const Messages = require("./../../constants/Messages");
 
-env();
-
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];

@@ -1,4 +1,3 @@
-//Imports
 const express = require("express");
 const path = require("path");
 const env = require("./utils/dotenvConfig");
@@ -7,11 +6,11 @@ const cors = require("cors");
 const userRoutes = require("./routes/userRouter/userRouter");
 const authRoutes = require("./routes/authRouter/authRouter");
 const documentRoutes = require("./routes/documentRouter/documentRouter");
-const db = require("./db/connectionPool");
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./utils/swagger/swagger");
-const { connectToSequelize } = require("./db/sequelizeConnection");
+// const { connectToSequelize } = require("./db/sequelizeConnection");
 const startNgrokTunnel = require("./utils/ngrok/ngrok");
+const {sequelize, models} = require("../docuvault-database")
 
 // Middlewares
 const app = express();
@@ -21,8 +20,12 @@ app.use(express.static(path.join(__dirname, "views/public")));
 app.use(cors());
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-connectToSequelize();
-env(); //Activates env.config()
+// connectToSequelize();
+
+//Connect to Sequelize
+sequelize.authenticate().then(() => {
+  console.log('API Server connected to database');
+}).catch(console.error);
 
 if (process.env.ENIVRONMENT == "NGROK") {
   startNgrokTunnel(process.env.PORT);

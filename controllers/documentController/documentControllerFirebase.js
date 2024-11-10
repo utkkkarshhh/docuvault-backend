@@ -16,7 +16,6 @@ const {
 } = require("firebase/storage");
 const { storage } = require("../../utils/firebase/firebase");
 
-env();
 app.use(express.json());
 
 const upload = multer({ storage: multer.memoryStorage() }).single("file");
@@ -56,24 +55,31 @@ const uploadToFirebase = async (req, res) => {
 
       const publicUrl = await getDownloadURL(storageRef);
 
-      const document = await Document.create({
-        document_name: name,
-        document_description: description,
-        document_type: type,
-        document_link: publicUrl,
-        user_id: user_id,
-      });
+      if (publicUrl) {
+        const document = await Document.create({
+          document_name: name,
+          document_description: description,
+          document_type: type,
+          document_link: publicUrl,
+          user_id: user_id,
+        });
 
-      currentUser.limit -= 1;
-      await currentUser.save();
+        currentUser.limit -= 1;
+        await currentUser.save();
 
-      res.status(Constants.STATUS_CODES.CREATED).json({
-        message: Messages.FIREBASE.SUCCESS.UPLOAD_SUCCESS,
-        success: true,
-        document,
-      });
+        res.status(Constants.STATUS_CODES.CREATED).json({
+          message: Messages.FIREBASE.SUCCESS.UPLOAD_SUCCESS,
+          success: true,
+          document,
+        });
+      } else {
+        res.status(Constants.STATUS_CODES.FORBIDDEN).json({
+          message: Messages.FIREBASE.ERROR.UPLOAD_FAILED,
+          success: false,
+        });
+      }
     } else {
-      res.status(Constants.STATUS_CODES.FORBIDDEN).json({
+      res.status(Constants.STATUS_CODES.INTERNAL_SERVER_ERROR).json({
         message: Messages.FIREBASE.ERROR.UPLOAD_LIMIT,
         success: false,
       });
@@ -81,7 +87,7 @@ const uploadToFirebase = async (req, res) => {
   } catch (error) {
     console.error("Error in uploadToFirebase:", error);
     res.status(Constants.STATUS_CODES.INTERNAL_SERVER_ERROR).json({
-      message: error.message || Messages.GENERAL.ERROR_EXECUTING_QUERY,
+      message: error.message || Messages.GENERAL.INTERNAL_SERVER_ERROR,
       success: false,
     });
   }
@@ -201,5 +207,5 @@ module.exports = {
   uploadToFirebase,
   downloadFromFirebase,
   deleteFromFirebase,
-  getAllDocumentsForUser,
+  getAllDocumentsForUser
 };
