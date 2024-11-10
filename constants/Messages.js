@@ -29,10 +29,14 @@ const Messages = {
     LOGIN_SUCCESSFUL: "Login successfully!",
     LOGOUT_SUCCESSFULLY: "Logged out successfully.",
     INVALID_TOKEN: "Invalid registration token.",
+    DOCUMENT_ID_FORMAT_OBJECT: "Document id or format object missing."
   },
   AUTHENTICATION: {
     NO_TOKEN: "Access Denied. No token found!",
     INVALID_TOKEN: "Access Denied. Invalid Token!",
+  },
+  ERROR: {
+    CONVERSION_FAILED: "Conversion failed!"
   },
   FIREBASE: {
     SUCCESS: {

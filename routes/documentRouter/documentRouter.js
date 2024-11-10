@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const documentController = require("../../controllers/documentController/documentControllerFirebase");
+const documentConversionController = require("../../controllers/documentController/documentConversionController")
 const authenticateToken = require("../../utils/authentication/authenticateToken");
 
 /**
@@ -87,10 +88,11 @@ const authenticateToken = require("../../utils/authentication/authenticateToken"
  */
 router.post(
   "/uploadDocument",
-  authenticateToken,
+  // authenticateToken,
   documentController.uploadToFirebase
 );
 
+// Download document as it is
 /**
  * @swagger
  * /api/doc/downloadDocument:
@@ -113,7 +115,7 @@ router.post(
  */
 router.get(
   "/downloadDocument",
-  authenticateToken,
+  // authenticateToken,
   documentController.downloadFromFirebase
 );
 
@@ -150,7 +152,7 @@ router.get(
  */
 router.post(
   "/deleteDocument",
-  authenticateToken,
+  // authenticateToken,
   documentController.deleteFromFirebase
 );
 
@@ -185,8 +187,13 @@ router.post(
  */
 router.get(
   "/getAllDocuments",
-  authenticateToken,
+  // authenticateToken,
   documentController.getAllDocumentsForUser
 );
+
+router.get(
+  "/convertDocument/",
+   //authenticateToken, 
+   documentConversionController.convertDocument)
 
 module.exports = router;
