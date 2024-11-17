@@ -1,7 +1,10 @@
 const express = require("express");
 const app = express();
 const { sequelize } = require("../../db/sequelizeConnection");
-const User = require("../../models/users")(sequelize);
+// const User = require("../../models/users")(sequelize);
+const UserLogin = require("../../models/userLogin");
+const Document = require("../../models/document");
+const UserDetails = require("../../models/userDetail");
 const Messages = require("../../constants/Messages");
 const Constants = require("../../constants/Constants");
 
@@ -10,7 +13,7 @@ app.use(express.json());
 // Get all users
 const getAllUsers = async (req, res) => {
   try {
-    const users = await User.findAll();
+    const users = await UserLogin.findAll();
 
     if (users.length === 0) {
       return res
@@ -34,7 +37,7 @@ const getAUser = async (req, res) => {
   const { user_id } = req.params;
 
   try {
-    const user = await User.findByPk(user_id);
+    const user = await UserLogin.findByPk(user_id);
 
     if (!user) {
       return res
@@ -63,7 +66,7 @@ const updateAUser = async (req, res) => {
   }
 
   try {
-    const [updatedCount] = await User.update(
+    const [updatedCount] = await UserLogin.update(
       { name, email, bio, dob },
       {
         where: { user_id },
@@ -78,7 +81,7 @@ const updateAUser = async (req, res) => {
         .json({ error: Messages.USER.NO_USER_FOUND });
     }
 
-    const updatedUser = await User.findByPk(user_id);
+    const updatedUser = await UserLogin.findByPk(user_id);
 
     if (!updatedUser) {
       return res
@@ -110,7 +113,7 @@ const deleteAUser = async (req, res) => {
   const { user_id } = req.params;
 
   try {
-    const deleted = await User.destroy({
+    const deleted = await UserLogin.destroy({
       where: { user_id },
     });
 

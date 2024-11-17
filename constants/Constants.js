@@ -14,7 +14,10 @@ const Constants = {
   },
   AUTH: {
     SALT_ROUNDS: 10,
-  }
+  },
+  ENDPOINTS: {
+    CONVERSION_SERVICE_ENDPOINT: "/api/convert_document",
+  },
 };
 
 module.exports = Constants;

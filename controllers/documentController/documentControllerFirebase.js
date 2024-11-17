@@ -2,8 +2,12 @@ const express = require("express");
 const app = express();
 const { v4: uuidv4 } = require("uuid");
 const { sequelize } = require("../../db/sequelizeConnection");
-const User = require("../../models/users")(sequelize);
-const Document = require("../../models/documents")(sequelize);
+// const User = require("../../models/users")(sequelize);
+// const Document = require("../../models/documents")(sequelize);
+const UserLogin = require("../../models/userLogin");
+const Document = require("../../models/document");
+const UserDetails = require("../../models/userDetail");
+const UserLimit = require("../../models/userLimit");
 const Messages = require("../../constants/Messages");
 const Constants = require("../../constants/Constants");
 const multer = require("multer");
@@ -44,7 +48,7 @@ const uploadToFirebase = async (req, res) => {
     }
 
     // Check the upload limit ('limit') for the user, if greater than 0 ,proceed, else return a repsonse that the user has reached upload limit
-    const currentUser = await User.findByPk(user_id);
+    const currentUser = await UserLogin.findByPk(user_id);
     const uniqueFileName = `${uuidv4()}-${file.originalname}`;
     const storageRef = ref(storage, uniqueFileName);
 
@@ -143,7 +147,7 @@ const deleteFromFirebase = async (req, res) => {
 
     await document.destroy();
 
-    const currentUser = await User.findByPk(user_id);
+    const currentUser = await UserLogin.findByPk(user_id);
     if (!currentUser) {
       return res.status(Constants.STATUS_CODES.NOT_FOUND).json({
         message: Messages.FIREBASE.ERROR.DELETION_FALIED,
@@ -177,7 +181,7 @@ const getAllDocumentsForUser = async (req, res) => {
   }
 
   try {
-    const currentUser = await User.findByPk(user_id);
+    const currentUser = await UserLogin.findByPk(user_id);
     if (currentUser) {
       const documents = await Document.findAll({
         where: { user_id: currentUser.user_id },
@@ -207,5 +211,5 @@ module.exports = {
   uploadToFirebase,
   downloadFromFirebase,
   deleteFromFirebase,
-  getAllDocumentsForUser
+  getAllDocumentsForUser,
 };

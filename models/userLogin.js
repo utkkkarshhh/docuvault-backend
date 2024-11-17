@@ -1,8 +1,8 @@
 const { DataTypes } = require("sequelize");
 
-const User = (sequelize) => {
+const UserLogin = (sequelize) => {
   return sequelize.define(
-    "User",
+    "UserLogin",
     {
       user_id: {
         type: DataTypes.UUID,
@@ -27,30 +27,9 @@ const User = (sequelize) => {
         type: DataTypes.STRING,
         allowNull: false,
       },
-      name: {
-        type: DataTypes.STRING,
-        allowNull: true,
-      },
-      bio: {
-        type: DataTypes.TEXT,
-        allowNull: true,
-      },
-      dob: {
-        type: DataTypes.DATEONLY,
-        allowNull: true,
-      },
-      limit: {
-        type: DataTypes.INTEGER,
-        defaultValue: 6,
-        allowNull: false,
-        validate: {
-          min: 0, 
-          max: 6, 
-        },
-      },
     },
     {
-      tableName: "users",
+      tableName: "user_login",
       timestamps: true,
       updatedAt: "updated_at",
       createdAt: "created_at",
@@ -58,4 +37,4 @@ const User = (sequelize) => {
   );
 };
 
-module.exports = User;
+module.exports = UserLogin;

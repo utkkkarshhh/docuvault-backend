@@ -4,14 +4,14 @@ const Constants = require("../../constants/Constants");
 const Messages = require("../../constants/Messages");
 const CircuitBreaker = require("opossum");
 
-const CONVERSION_SERVICE_URL = process.env.CONVERSION_SERVICE_URL;
+const CONVERSION_BASE_SERVICE_URL = process.env.CONVERSION_SERVICE_URL;
 const CONVERSION_TIMEOUT = parseInt(process.env.CONVERSION_SERVICE_TIMEOUT);
 
 const conversionBreaker = new CircuitBreaker(
   async function (document) {
     try {
       const response = await axios.post(
-        `${CONVERSION_SERVICE_URL}/api/convert_document`,
+        `${CONVERSION_BASE_SERVICE_URL}${Constants.ENDPOINTS.CONVERSION_SERVICE_ENDPOINT}`,
         document,
         {
           timeout: CONVERSION_TIMEOUT,
@@ -23,7 +23,10 @@ const conversionBreaker = new CircuitBreaker(
       return response;
     } catch (error) {
       // Check if it's a specific error (e.g., 400) that shouldn't trigger fallback
-      if (error.response && error.response.status === 400) {
+      if (
+        error.response &&
+        error.response.status === Constants.STATUS_CODES.BAD_REQUEST
+      ) {
         throw error; // Allows it to be handled in `convertDocument` without fallback
       }
       throw new Error("Service temporarily unavailable");

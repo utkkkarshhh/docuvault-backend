@@ -6,7 +6,8 @@ const { v4: uuidv4 } = require("uuid");
 const { sequelize } = require("../../db/sequelizeConnection");
 const Messages = require("../../constants/Messages");
 const Constant = require("../../constants/Constants");
-const User = require("../../models/users")(sequelize);
+// const User = require("../../models/users")(sequelize);
+const UserLogin = require('../../models/userLogin');
 const { Op, Sequelize } = require("sequelize");
 
 app.use(express.json());
@@ -22,7 +23,7 @@ const registerUser = async (req, res) => {
         .json({ message: Messages.VALIDATION.INVALID_TOKEN, success: false });
     }
 
-    const existingUser = await User.findOne({
+    const existingUser = await UserLogin.findOne({
       where: {
         [Op.or]: [{ email }, { username }],
       },
@@ -38,7 +39,7 @@ const registerUser = async (req, res) => {
       password,
       Constant.AUTH.SALT_ROUNDS
     );
-    await User.create({
+    await UserLogin.create({
       user_id: uuidv4(),
       email,
       username,
@@ -72,7 +73,7 @@ const loginUser = async (req, res) => {
       [Sequelize.Op.or]: [{ username: identifier }, { email: identifier }],
     };
 
-    const user = await User.findOne({
+    const user = await UserLogin.findOne({
       where: whereClause,
     });
 
