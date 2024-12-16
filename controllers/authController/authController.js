@@ -6,7 +6,7 @@ const { v4: uuidv4 } = require("uuid");
 const { sequelize } = require("../../db/sequelizeConnection");
 const Messages = require("../../constants/Messages");
 const Constant = require("../../constants/Constants");
-const User = require("../../models/users")(sequelize);
+const UserLogin = require("../../../docuvault-database/models/userLogin")(sequelize);
 const { Op, Sequelize } = require("sequelize");
 
 app.use(express.json());
@@ -16,13 +16,34 @@ const registerUser = async (req, res) => {
   console.log(email, username, password, token);
 
   try {
+    if (!email && !username) {
+      return res.status(Constant.STATUS_CODES.BAD_REQUEST).json({
+        message: Messages.VALIDATION.EMAIL_AND_USERNAME_REQUIRED,
+        success: false,
+      });
+    }
+
+    if (!email) {
+      return res.status(Constant.STATUS_CODES.BAD_REQUEST).json({
+        message: Messages.VALIDATION.EMAIL_REQUIRED,
+        success: false,
+      });
+    }
+
+    if (!username) {
+      return res.status(Constant.STATUS_CODES.BAD_REQUEST).json({
+        message: Messages.VALIDATION.USERNAME_REQUIRED,
+        success: false,
+      });
+    }
+
     if (token !== process.env.REGISTER_TOKEN) {
       return res
         .status(Constant.STATUS_CODES.UNAUTHORIZED)
         .json({ message: Messages.VALIDATION.INVALID_TOKEN, success: false });
     }
 
-    const existingUser = await User.findOne({
+    const existingUser = await UserLogin.findOne({
       where: {
         [Op.or]: [{ email }, { username }],
       },
@@ -38,7 +59,7 @@ const registerUser = async (req, res) => {
       password,
       Constant.AUTH.SALT_ROUNDS
     );
-    await User.create({
+    await UserLogin.create({
       user_id: uuidv4(),
       email,
       username,
@@ -61,9 +82,17 @@ const loginUser = async (req, res) => {
   const { identifier, password } = req.body;
 
   try {
+
     if (!identifier) {
       return res.status(Constant.STATUS_CODES.BAD_REQUEST).json({
         message: Messages.VALIDATION.IDENTIFIER_REQUIRED,
+        success: false,
+      });
+    }
+
+    if(!password){
+      return res.status(Constant.STATUS_CODES.BAD_REQUEST).json({
+        message: Messages.VALIDATION.PASSWORD_MISSING,
         success: false,
       });
     }
@@ -72,7 +101,7 @@ const loginUser = async (req, res) => {
       [Sequelize.Op.or]: [{ username: identifier }, { email: identifier }],
     };
 
-    const user = await User.findOne({
+    const user = await UserLogin.findOne({
       where: whereClause,
     });
 
