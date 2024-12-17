@@ -7,13 +7,13 @@ const { sequelize } = require("../../db/sequelizeConnection");
 const Messages = require("../../constants/Messages");
 const Constant = require("../../constants/Constants");
 const UserLogin = require("../../../docuvault-database/models/userLogin")(sequelize);
+const UserDetails = require("../../../docuvault-database/models/userDetail")(sequelize);
 const { Op, Sequelize } = require("sequelize");
 
 app.use(express.json());
 
 const registerUser = async (req, res) => {
   const { email, username, password, token } = req.body;
-  console.log(email, username, password, token);
 
   try {
     if (!email && !username) {
@@ -55,23 +55,47 @@ const registerUser = async (req, res) => {
         .json({ message: Messages.VALIDATION.ALREADY_EXISTS, success: false });
     }
 
-    const hashedPassword = await bcrypt.hash(
-      password,
-      Constant.AUTH.SALT_ROUNDS
-    );
-    await UserLogin.create({
-      user_id: uuidv4(),
-      email,
-      username,
-      password: hashedPassword,
-    });
+    const transaction = await sequelize.transaction();
 
-    return res.status(Constant.STATUS_CODES.CREATED).json({
-      message: Messages.VALIDATION.USER_REGISTERED_SUCCESSFULLY,
-      success: true,
-    });
+    try {
+      const hashedPassword = await bcrypt.hash(
+        password,
+        Constant.AUTH.SALT_ROUNDS
+      );
+
+      const userLogin = await UserLogin.create(
+        {
+          user_id: uuidv4(),
+          email,
+          username,
+          password: hashedPassword,
+        },
+        { transaction }
+      );
+
+      await UserDetails.create(
+        {
+          user_id: userLogin.user_id,
+          name: null,
+          bio: null,
+          dob: null,
+        },
+        { transaction }
+      );
+
+      await transaction.commit();
+
+      return res.status(Constant.STATUS_CODES.CREATED).json({
+        message: Messages.VALIDATION.USER_REGISTERED_SUCCESSFULLY,
+        success: true,
+      });
+    } catch (err) {
+      await transaction.rollback();
+      console.error('Transaction failed:', err);
+      throw err;
+    }
   } catch (error) {
-    console.error("Error in registerUser:", error);
+    console.error('Error in registerUser:', error);
     res
       .status(Constant.STATUS_CODES.INTERNAL_SERVER_ERROR)
       .json({ message: Messages.GENERAL.INTERNAL_SERVER, success: false });

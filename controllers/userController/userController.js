@@ -1,7 +1,8 @@
 const express = require("express");
 const app = express();
 const { sequelize } = require("../../db/sequelizeConnection");
-const User = require("../../models/users")(sequelize);
+const UserLogin = require("../../../docuvault-database/models/userLogin")(sequelize);
+const UserDetails = require("../../../docuvault-database/models/userDetail")(sequelize);
 const Messages = require("../../constants/Messages");
 const Constants = require("../../constants/Constants");
 
@@ -10,7 +11,7 @@ app.use(express.json());
 // Get all users
 const getAllUsers = async (req, res) => {
   try {
-    const users = await User.findAll();
+    const users = await UserDetails.findAll();
 
     if (users.length === 0) {
       return res
@@ -34,7 +35,9 @@ const getAUser = async (req, res) => {
   const { user_id } = req.params;
 
   try {
-    const user = await User.findByPk(user_id);
+    const user = await UserDetails.findOne({
+      where: { user_id },
+    });
 
     if (!user) {
       return res
@@ -42,65 +45,68 @@ const getAUser = async (req, res) => {
         .json({ message: Messages.USER.NO_USER_WITH_ID, success: false });
     }
 
-    res.status(Constants.STATUS_CODES.OK).json(user);
+    res.status(Constants.STATUS_CODES.OK).json({
+      success: true,
+      data : {user},
+    });
   } catch (err) {
     console.error(Messages.GENERAL.ERROR_EXECUTING_QUERY, err.stack);
     res
       .status(Constants.STATUS_CODES.INTERNAL_SERVER_ERROR)
-      .json({ error: Messages.GENERAL.INTERNAL_SERVER });
+      .json({ error: Messages.GENERAL.INTERNAL_SERVER, success: false });
   }
 };
 
-//Update User
+//Update User By ID
 const updateAUser = async (req, res) => {
   const { user_id } = req.params;
-  const { name, email, bio, dob } = req.body;
+  const { name, bio, dob } = req.body;
 
-  if (!name && !email && !bio && !dob) {
+  // Validate input
+  if (!name && !bio && !dob) {
     return res.status(Constants.STATUS_CODES.BAD_REQUEST).json({
       error: Messages.VALIDATION.ONE_FIELD_REQUIRED,
     });
   }
 
   try {
-    const [updatedCount] = await User.update(
-      { name, email, bio, dob },
+    // Update UserDetails table
+    const [updatedCount] = await UserDetails.update(
+      { name, bio, dob },
       {
         where: { user_id },
-        returning: true,
-        plain: true, 
       }
     );
 
+    // Check if any rows were updated
     if (updatedCount === 0) {
       return res
         .status(Constants.STATUS_CODES.NOT_FOUND)
         .json({ error: Messages.USER.NO_USER_FOUND });
     }
 
-    const updatedUser = await User.findByPk(user_id);
+    // Fetch the updated user details
+    const updatedUser = await UserDetails.findOne({
+      where: { user_id },
+    });
 
-    if (!updatedUser) {
-      return res
-        .status(Constants.STATUS_CODES.NOT_FOUND)
-        .json({ error: Messages.USER.NO_USER_FOUND });
-    }
-
-    res.status(Constants.STATUS_CODES.OK).json(updatedUser);
+    res.status(Constants.STATUS_CODES.OK).json({
+      success: true,
+      message: Messages.USER.USER_UPDATED_SUCCESSFULLY,
+      data: updatedUser,
+    });
   } catch (err) {
     console.error(Messages.GENERAL.ERROR_EXECUTING_QUERY, err.stack);
-    if (err.name === "SequelizeUniqueConstraintError") {
+
+    // Handle specific Sequelize errors
+    if (err.name === "SequelizeValidationError") {
       return res
         .status(Constants.STATUS_CODES.BAD_REQUEST)
-        .json({ error: Messages.VALIDATION.EMAIL_ALREADY_EXISTS });
-    } else if (err.name === "SequelizeValidationError") {
-      return res
-        .status(Constants.STATUS_CODES.BAD_REQUEST)
-        .json({ error: Messages.VALIDATION.MISSING_REQUIRED_FIELDS });
+        .json({ error: Messages.VALIDATION.MISSING_REQUIRED_FIELDS, success: false });
     } else {
       return res
         .status(Constants.STATUS_CODES.INTERNAL_SERVER_ERROR)
-        .json({ error: Messages.GENERAL.INTERNAL_SERVER });
+        .json({ error: Messages.GENERAL.INTERNAL_SERVER, success: false });
     }
   }
 };
@@ -110,24 +116,24 @@ const deleteAUser = async (req, res) => {
   const { user_id } = req.params;
 
   try {
-    const deleted = await User.destroy({
+    const deleted = await UserLogin.destroy({
       where: { user_id },
     });
 
     if (deleted === 0) {
       return res
         .status(Constants.STATUS_CODES.NOT_FOUND)
-        .json({ error: Messages.USER.NO_USER_FOUND });
+        .json({ error: Messages.USER.NO_USER_FOUND, success: false });
     }
 
     res
       .status(Constants.STATUS_CODES.OK)
-      .json({ message: Messages.USER.USER_DELETED });
+      .json({ message: Messages.USER.USER_DELETED, success: true });
   } catch (err) {
     console.error(Messages.GENERAL.ERROR_EXECUTING_QUERY, err.stack);
     res
       .status(Constants.STATUS_CODES.INTERNAL_SERVER_ERROR)
-      .json({ error: Messages.GENERAL.INTERNAL_SERVER });
+      .json({ error: Messages.GENERAL.INTERNAL_SERVER, success: false });
   }
 };
 
