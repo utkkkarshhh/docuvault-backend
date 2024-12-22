@@ -69,7 +69,7 @@ router.get("/users", authenticateToken, usersController.getAllUsers);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.get("/user/:user_id", authenticateToken, usersController.getAUser);
+router.get("/userDetail/:user_id", authenticateToken, usersController.getAUser);
 
 /**
  * @swagger
@@ -141,7 +141,17 @@ router.get("/user/:user_id", authenticateToken, usersController.getAUser);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.put("/updateUser/:user_id", authenticateToken, usersController.updateAUser);
+router.put(
+  "/updateUserDetail/:user_id",
+  authenticateToken,
+  usersController.updateUserDetail
+);
+
+router.put(
+  "/updateUserLogin/:user_id",
+  authenticateToken,
+  usersController.updateUserLogin
+);
 
 /**
  * @swagger
@@ -177,6 +187,10 @@ router.put("/updateUser/:user_id", authenticateToken, usersController.updateAUse
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.delete("/deleteUser/:user_id", authenticateToken, usersController.deleteAUser);
+router.delete(
+  "/deleteUser/:user_id",
+  authenticateToken,
+  usersController.deleteAUser
+);
 
 module.exports = router;

@@ -12,6 +12,7 @@ const Messages = {
     NO_USERS_FOUND: "No users found.",
     NO_USER_FOUND: "No user found.",
     NO_USER_WITH_ID: "No user with this ID exists.",
+    USER_UPDATED: "User updated successfully.",
     USER_DELETED: "User deleted successfully.",
   },
   VALIDATION: {

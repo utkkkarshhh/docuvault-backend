@@ -1,7 +1,7 @@
-const env = require("./../../utils/dotenvConfig");
+const env = require("../dotenvConfig");
 const jwt = require("jsonwebtoken");
 const Constants = require("../../constants/Constants");
-const Messages = require("./../../constants/Messages");
+const Messages = require("../../constants/Messages");
 
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers["authorization"];

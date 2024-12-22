@@ -6,8 +6,11 @@ const { v4: uuidv4 } = require("uuid");
 const { sequelize } = require("../../db/sequelizeConnection");
 const Messages = require("../../constants/Messages");
 const Constant = require("../../constants/Constants");
-const UserLogin = require("../../../docuvault-database/models/userLogin")(sequelize);
-const UserDetails = require("../../../docuvault-database/models/userDetail")(sequelize);
+const UserLogin = require("../../../database/models/userLogin")(sequelize);
+const UserDetails = require("../../../database/models/userDetail")(sequelize);
+const UserLimit = require("../../../database/models/userLimit")(sequelize);
+const PublicVisibilty =
+  require("../../../database/models/publicVisibility")(sequelize);
 const { Op, Sequelize } = require("sequelize");
 
 app.use(express.json());
@@ -83,6 +86,13 @@ const registerUser = async (req, res) => {
         { transaction }
       );
 
+      await UserLimit.create({ user_id: userLogin.user_id }, { transaction });
+
+      await PublicVisibilty.create(
+        { user_id: userLogin.user_id },
+        { transaction }
+      );
+
       await transaction.commit();
 
       return res.status(Constant.STATUS_CODES.CREATED).json({
@@ -91,11 +101,11 @@ const registerUser = async (req, res) => {
       });
     } catch (err) {
       await transaction.rollback();
-      console.error('Transaction failed:', err);
+      console.error("Transaction failed:", err);
       throw err;
     }
   } catch (error) {
-    console.error('Error in registerUser:', error);
+    console.error("Error in registerUser:", error);
     res
       .status(Constant.STATUS_CODES.INTERNAL_SERVER_ERROR)
       .json({ message: Messages.GENERAL.INTERNAL_SERVER, success: false });
@@ -106,7 +116,6 @@ const loginUser = async (req, res) => {
   const { identifier, password } = req.body;
 
   try {
-
     if (!identifier) {
       return res.status(Constant.STATUS_CODES.BAD_REQUEST).json({
         message: Messages.VALIDATION.IDENTIFIER_REQUIRED,
@@ -114,7 +123,7 @@ const loginUser = async (req, res) => {
       });
     }
 
-    if(!password){
+    if (!password) {
       return res.status(Constant.STATUS_CODES.BAD_REQUEST).json({
         message: Messages.VALIDATION.PASSWORD_MISSING,
         success: false,
@@ -149,26 +158,24 @@ const loginUser = async (req, res) => {
       { expiresIn: "1h" }
     );
 
-    res.cookie('access_token', token, {
+    res.cookie("access_token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 3600000
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 3600000,
     });
 
-    return res
-      .status(Constant.STATUS_CODES.OK)
-      .json({
-        message: Messages.VALIDATION.LOGIN_SUCCESSFUL,
-        success: true,
-        user: {
-          user_id: user.user_id,
-          username: user.username,
-          email: user.email,
-          name: user.name
-        },
-        token: token
-      });
+    return res.status(Constant.STATUS_CODES.OK).json({
+      message: Messages.VALIDATION.LOGIN_SUCCESSFUL,
+      success: true,
+      user: {
+        user_id: user.user_id,
+        username: user.username,
+        email: user.email,
+        name: user.name,
+      },
+      token: token,
+    });
   } catch (error) {
     res
       .status(Constant.STATUS_CODES.INTERNAL_SERVER_ERROR)

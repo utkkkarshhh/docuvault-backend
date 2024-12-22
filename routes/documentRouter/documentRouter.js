@@ -88,7 +88,7 @@ const authenticateToken = require("../../utils/authentication/authenticateToken"
  */
 router.post(
   "/uploadDocument",
-  // authenticateToken,
+  authenticateToken,
   documentController.uploadToFirebase
 );
 
@@ -115,7 +115,7 @@ router.post(
  */
 router.get(
   "/downloadDocument",
-  // authenticateToken,
+  authenticateToken,
   documentController.downloadFromFirebase
 );
 
@@ -152,7 +152,7 @@ router.get(
  */
 router.post(
   "/deleteDocument",
-  // authenticateToken,
+  authenticateToken,
   documentController.deleteFromFirebase
 );
 
@@ -187,13 +187,13 @@ router.post(
  */
 router.get(
   "/getAllDocuments",
-  // authenticateToken,
+  authenticateToken,
   documentController.getAllDocumentsForUser
 );
 
 router.get(
   "/convertDocument/",
-   //authenticateToken, 
+   authenticateToken, 
    documentConversionController.convertDocument)
 
 module.exports = router;

@@ -10,7 +10,7 @@ const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./utils/swagger/swagger");
 // const { connectToSequelize } = require("./db/sequelizeConnection");
 const startNgrokTunnel = require("./utils/ngrok/ngrok");
-const {sequelize, models} = require("../docuvault-database")
+const {sequelize, models} = require("../database")
 
 // Middlewares
 const app = express();

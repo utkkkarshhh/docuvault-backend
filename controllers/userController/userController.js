@@ -1,10 +1,15 @@
 const express = require("express");
 const app = express();
 const { sequelize } = require("../../db/sequelizeConnection");
-const UserLogin = require("../../../docuvault-database/models/userLogin")(sequelize);
-const UserDetails = require("../../../docuvault-database/models/userDetail")(sequelize);
+const UserLogin = require("../../../database/models/userLogin")(
+  sequelize
+);
+const UserDetails = require("../../../database/models/userDetail")(
+  sequelize
+);
 const Messages = require("../../constants/Messages");
 const Constants = require("../../constants/Constants");
+const { Op } = require("sequelize");
 
 app.use(express.json());
 
@@ -16,7 +21,7 @@ const getAllUsers = async (req, res) => {
     if (users.length === 0) {
       return res
         .status(Constants.STATUS_CODES.NOT_FOUND)
-        .json({ error: Messages.USER.NO_USERS_FOUND });
+        .json({ message: Messages.USER.NO_USERS_FOUND, success: true });
     }
 
     res
@@ -35,11 +40,15 @@ const getAUser = async (req, res) => {
   const { user_id } = req.params;
 
   try {
-    const user = await UserDetails.findOne({
+    const userObject = await UserDetails.findOne({
       where: { user_id },
     });
 
-    if (!user) {
+    const userLoginObject = await UserLogin.findOne({
+      where: { user_id },
+    });
+
+    if (!userObject || !userLoginObject) {
       return res
         .status(Constants.STATUS_CODES.NOT_FOUND)
         .json({ message: Messages.USER.NO_USER_WITH_ID, success: false });
@@ -47,7 +56,16 @@ const getAUser = async (req, res) => {
 
     res.status(Constants.STATUS_CODES.OK).json({
       success: true,
-      data : {user},
+      data: {
+        user_id: userLoginObject.user_id,
+        email: userLoginObject.email,
+        username: userLoginObject.username,
+        name: userObject.name,
+        dob: userObject.dob,
+        bio: userObject.bio,
+        created_at: userLoginObject.created_at,
+        updated_at: userLoginObject.updated_at,
+      },
     });
   } catch (err) {
     console.error(Messages.GENERAL.ERROR_EXECUTING_QUERY, err.stack);
@@ -57,8 +75,8 @@ const getAUser = async (req, res) => {
   }
 };
 
-//Update User By ID
-const updateAUser = async (req, res) => {
+//  Update user By ID
+const updateUserDetail = async (req, res) => {
   const { user_id } = req.params;
   const { name, bio, dob } = req.body;
 
@@ -100,14 +118,72 @@ const updateAUser = async (req, res) => {
 
     // Handle specific Sequelize errors
     if (err.name === "SequelizeValidationError") {
-      return res
-        .status(Constants.STATUS_CODES.BAD_REQUEST)
-        .json({ error: Messages.VALIDATION.MISSING_REQUIRED_FIELDS, success: false });
+      return res.status(Constants.STATUS_CODES.BAD_REQUEST).json({
+        error: Messages.VALIDATION.MISSING_REQUIRED_FIELDS,
+        success: false,
+      });
     } else {
       return res
         .status(Constants.STATUS_CODES.INTERNAL_SERVER_ERROR)
         .json({ error: Messages.GENERAL.INTERNAL_SERVER, success: false });
     }
+  }
+};
+
+// Update user login
+const updateUserLogin = async (req, res) => {
+  const { username, email } = req.body;
+  const { user_id } = req.params;
+
+  // Validate input
+  if (!username && !email) {
+    return res.status(Constants.STATUS_CODES.BAD_REQUEST).json({
+      error: Messages.VALIDATION.EMAIL_OR_USERNAME_REQUIRED,
+      success: false,
+    });
+  }
+
+  try {
+    const existingUser = await UserLogin.findOne({
+      where: {
+        [Op.or]: [{ username }, { email }],
+        user_id: { [Op.ne]: user_id },
+      },
+    });
+
+    if (existingUser) {
+      return res.status(Constants.STATUS_CODES.CONFLICT).json({
+        success: false,
+        error: Messages.VALIDATION.ALREADY_EXISTS,
+      });
+    }
+
+    // Update UserDetails table
+    const [updatedCount] = await UserLogin.update(
+      { username, email },
+      {
+        where: { user_id },
+      }
+    );
+
+    // Check if any rows were updated
+    if (updatedCount === 0) {
+      return res
+        .status(Constants.STATUS_CODES.NOT_FOUND)
+        .json({ error: Messages.USER.NO_USER_FOUND, success: false });
+    }
+
+    // Success response
+    return res.status(Constants.STATUS_CODES.OK).json({
+      message: Messages.USER.USER_UPDATED,
+      success: true,
+    });
+  } catch (error) {
+    console.error("Error updating user:", error);
+    return res.status(Constants.STATUS_CODES.INTERNAL_SERVER_ERROR).json({
+      error: Messages.GENERAL.INTERNAL_SERVER,
+      success: false,
+    });
   }
 };
 
@@ -140,6 +216,7 @@ const deleteAUser = async (req, res) => {
 module.exports = {
   getAllUsers,
   getAUser,
-  updateAUser,
+  updateUserDetail,
   deleteAUser,
+  updateUserLogin,
 };

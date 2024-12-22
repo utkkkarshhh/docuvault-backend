@@ -2,8 +2,9 @@ const express = require("express");
 const app = express();
 const { v4: uuidv4 } = require("uuid");
 const { sequelize } = require("../../db/sequelizeConnection");
-const Document = require("../../../docuvault-database/models/document")(sequelize);
-const UserLimit = require("../../../docuvault-database/models/userLimit")(sequelize);
+const Document = require("../../../database/models/document")(sequelize);
+const UserLimit = require("../../../database/models/userLimit")(sequelize);
+const UserLogin = require("../../../database/models/userLogin")(sequelize);
 const Messages = require("../../constants/Messages");
 const Constants = require("../../constants/Constants");
 const multer = require("multer");
@@ -44,11 +45,15 @@ const uploadToFirebase = async (req, res) => {
     }
 
     // Check the upload limit ('limit') for the user, if greater than 0 ,proceed, else return a repsonse that the user has reached upload limit
-    const currentUser = await User.findByPk(user_id);
+    const userLimitObject = await UserLimit.findOne({ where: { user_id } });
     const uniqueFileName = `${uuidv4()}-${file.originalname}`;
     const storageRef = ref(storage, uniqueFileName);
 
-    if (currentUser.limit > 0) {
+    console.log(`Limit : ${userLimitObject.limit}`)
+    console.log(`uniqueFileName : ${uniqueFileName}`)
+    console.log(`storageRef : ${storageRef}`)
+
+    if (userLimitObject.limit > 0) {
       await uploadBytes(storageRef, file.buffer, {
         contentType: file.mimetype,
       });
@@ -87,7 +92,7 @@ const uploadToFirebase = async (req, res) => {
   } catch (error) {
     console.error("Error in uploadToFirebase:", error);
     res.status(Constants.STATUS_CODES.INTERNAL_SERVER_ERROR).json({
-      message: error.message || Messages.GENERAL.INTERNAL_SERVER_ERROR,
+      message: error.message || Messages.GENERAL.INTERNAL_SERVER,
       success: false,
     });
   }
@@ -207,5 +212,5 @@ module.exports = {
   uploadToFirebase,
   downloadFromFirebase,
   deleteFromFirebase,
-  getAllDocumentsForUser
+  getAllDocumentsForUser,
 };
