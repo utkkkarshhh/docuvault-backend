@@ -56,6 +56,7 @@ const Messages = {
       DELETION_FALIED: "User not found, Deletion failed!",
       UPLOAD_LIMIT: "Oops! You've reached your upload limit!",
       USER_ID_DOES_NOT_MAPS: "Provided user_id does not maps to this document.",
+      DOCUMENT_NOT_FOUND: "Document not found!"
     },
   },
 };

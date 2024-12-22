@@ -44,56 +44,52 @@ const uploadToFirebase = async (req, res) => {
       });
     }
 
-    // Check the upload limit ('limit') for the user, if greater than 0 ,proceed, else return a repsonse that the user has reached upload limit
     const userLimitObject = await UserLimit.findOne({ where: { user_id } });
-    const uniqueFileName = `${uuidv4()}-${file.originalname}`;
-    const storageRef = ref(storage, uniqueFileName);
-
-    console.log(`Limit : ${userLimitObject.limit}`)
-    console.log(`uniqueFileName : ${uniqueFileName}`)
-    console.log(`storageRef : ${storageRef}`)
-
-    if (userLimitObject.limit > 0) {
-      await uploadBytes(storageRef, file.buffer, {
-        contentType: file.mimetype,
-      });
-
-      const publicUrl = await getDownloadURL(storageRef);
-
-      if (publicUrl) {
-        const document = await Document.create({
-          document_name: name,
-          document_description: description,
-          document_type: type,
-          document_link: publicUrl,
-          user_id: user_id,
-        });
-
-        currentUser.limit -= 1;
-        await currentUser.save();
-
-        res.status(Constants.STATUS_CODES.CREATED).json({
-          message: Messages.FIREBASE.SUCCESS.UPLOAD_SUCCESS,
-          success: true,
-          document,
-        });
-      } else {
-        res.status(Constants.STATUS_CODES.FORBIDDEN).json({
-          message: Messages.FIREBASE.ERROR.UPLOAD_FAILED,
-          success: false,
-        });
-      }
-    } else {
-      res.status(Constants.STATUS_CODES.INTERNAL_SERVER_ERROR).json({
+    if (!userLimitObject || userLimitObject.limit <= 0) {
+      return res.status(Constants.STATUS_CODES.FORBIDDEN).json({
         message: Messages.FIREBASE.ERROR.UPLOAD_LIMIT,
         success: false,
       });
     }
+
+    const uniqueFileName = `${uuidv4()}-${file.originalname}`;
+    const storageRef = ref(storage, uniqueFileName);
+    const fileFormat = file.originalname.split(".").pop();
+
+    await uploadBytes(storageRef, file.buffer, {
+      contentType: file.mimetype,
+    });
+
+    const publicUrl = await getDownloadURL(storageRef);
+    if (!publicUrl) {
+      throw new Error("Failed to generate public URL for the uploaded file.");
+    }
+
+    const document = await Document.create({
+      id: uuidv4(),
+      name,
+      description,
+      type,
+      link: publicUrl,
+      format: fileFormat,
+      user_id,
+    });
+
+    // Decrement user's upload limit
+    userLimitObject.limit -= 1;
+    await userLimitObject.save();
+
+    res.status(Constants.STATUS_CODES.CREATED).json({
+      message: Messages.FIREBASE.SUCCESS.UPLOAD_SUCCESS,
+      success: true,
+      data: document,
+    });
   } catch (error) {
     console.error("Error in uploadToFirebase:", error);
     res.status(Constants.STATUS_CODES.INTERNAL_SERVER_ERROR).json({
-      message: error.message || Messages.GENERAL.INTERNAL_SERVER,
+      message: Messages.FIREBASE.ERROR.UPLOAD_FAILED,
       success: false,
+      error: error.message,
     });
   }
 };
@@ -119,7 +115,11 @@ const downloadFromFirebase = (req, res) => {
 
 const deleteFromFirebase = async (req, res) => {
   const { document_id, user_id } = req.body;
+
+  const transaction = await sequelize.transaction(); // Start transaction
+
   try {
+    // Validate request
     if (!document_id || !user_id) {
       return res.status(Constants.STATUS_CODES.BAD_REQUEST).json({
         message: Messages.FIREBASE.ERROR.MISSING_FIELDS,
@@ -127,43 +127,54 @@ const deleteFromFirebase = async (req, res) => {
       });
     }
 
-    const document = await Document.findByPk(document_id);
-
-    if (document.user_id != user_id) {
-      return res.status(Constants.STATUS_CODES.FORBIDDEN).json({
-        message: Messages.FIREBASE.ERROR.USER_ID_DOES_NOT_MAPS,
-        success: false,
-      });
-    }
+    // Find the document in the database
+    const document = await Document.findByPk(document_id, { transaction });
 
     if (!document) {
+      await transaction.rollback();
       return res.status(Constants.STATUS_CODES.NOT_FOUND).json({
         message: Messages.FIREBASE.ERROR.DOCUMENT_NOT_FOUND,
         success: false,
       });
     }
 
-    const storageRef = ref(storage, document.document_link);
-    await deleteObject(storageRef);
-
-    await document.destroy();
-
-    const currentUser = await User.findByPk(user_id);
-    if (!currentUser) {
-      return res.status(Constants.STATUS_CODES.NOT_FOUND).json({
-        message: Messages.FIREBASE.ERROR.DELETION_FALIED,
+    // Verify user ownership of the document
+    if (document.user_id !== user_id) {
+      await transaction.rollback();
+      return res.status(Constants.STATUS_CODES.FORBIDDEN).json({
+        message: Messages.FIREBASE.ERROR.USER_ID_DOES_NOT_MAPS,
         success: false,
       });
     }
 
-    currentUser.limit += 1;
-    await currentUser.save();
+    // Delete the file from Firebase Storage
+    const storageRef = ref(storage, document.link); // Ensure `document.link` is a valid file path
+    await deleteObject(storageRef).catch(async (err) => {
+      console.error("Error deleting file from Firebase:", err);
+      await transaction.rollback();
+      throw new Error(Messages.FIREBASE.ERROR.DELETION_FAILED);
+    });
 
+    // Delete the document from the database
+    await document.destroy({ transaction });
+
+    // Update the user's document limit
+    const currentUser = await UserLimit.findByPk(user_id, { transaction });
+    if (currentUser) {
+      currentUser.limit += 1;
+      await currentUser.save({ transaction });
+    }
+
+    // Commit transaction
+    await transaction.commit();
+
+    // Respond with success
     res.status(Constants.STATUS_CODES.OK).json({
       message: Messages.FIREBASE.SUCCESS.DELETED_SUCCESS,
       success: true,
     });
   } catch (error) {
+    await transaction.rollback(); // Roll back transaction on error
     console.error("Error in deleteFromFirebase:", error);
     res
       .status(Constants.STATUS_CODES.INTERNAL_SERVER_ERROR)
