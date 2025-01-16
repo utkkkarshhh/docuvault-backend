@@ -1,49 +1,49 @@
 const { DataTypes } = require("sequelize");
 
-const Documents = (sequelize) => {
+const Document = (sequelize) => {
   return sequelize.define(
-    "Documents",
+    "Document",
     {
-      document_id: {
+      id: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         primaryKey: true,
         allowNull: false,
       },
-      document_name: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        unique: false,
-        validate: {
-          notEmpty: true,
-        },
-      },
-      document_description: {
+      name: {
         type: DataTypes.STRING,
         allowNull: false,
         validate: {
           notEmpty: true,
         },
       },
-      document_type: {
+      description: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notEmpty: true,
+        },
+      },
+      type: {
         type: DataTypes.STRING,
         allowNull: true,
-        validate: {
-          notEmpty: true,
-        },
       },
-      document_link: {
+      link: {
         type: DataTypes.STRING,
         allowNull: false,
         validate: {
           isUrl: true,
         },
       },
+      format: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
       user_id: {
         type: DataTypes.UUID,
         allowNull: false,
         references: {
-          model: "users",
+          model: "user_login",
           key: "user_id",
         },
         onUpdate: "CASCADE",
@@ -51,7 +51,7 @@ const Documents = (sequelize) => {
       },
     },
     {
-      tableName: "documents",
+      tableName: "document",
       timestamps: true,
       updatedAt: "updated_at",
       createdAt: "created_at",
@@ -59,4 +59,4 @@ const Documents = (sequelize) => {
   );
 };
 
-module.exports = Documents;
+module.exports = Document;

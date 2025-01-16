@@ -1,10 +1,10 @@
 const express = require("express");
 const app = express();
 const { sequelize } = require("../../db/sequelizeConnection");
-const UserLogin = require("../../../database/models/userLogin")(
+const UserLogin = require("../../models/userLogin")(
   sequelize
 );
-const UserDetails = require("../../../database/models/userDetail")(
+const UserDetails = require("../../models/userDetail")(
   sequelize
 );
 const Messages = require("../../constants/Messages");

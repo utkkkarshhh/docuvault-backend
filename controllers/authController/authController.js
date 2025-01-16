@@ -6,11 +6,11 @@ const { v4: uuidv4 } = require("uuid");
 const { sequelize } = require("../../db/sequelizeConnection");
 const Messages = require("../../constants/Messages");
 const Constant = require("../../constants/Constants");
-const UserLogin = require("../../../database/models/userLogin")(sequelize);
-const UserDetails = require("../../../database/models/userDetail")(sequelize);
-const UserLimit = require("../../../database/models/userLimit")(sequelize);
+const UserLogin = require("../../models/userLogin")(sequelize);
+const UserDetails = require("../../models/userDetail")(sequelize);
+const UserLimit = require("../../models/userLimit")(sequelize);
 const PublicVisibilty =
-  require("../../../database/models/publicVisibility")(sequelize);
+  require("../../models/publicVisibility")(sequelize);
 const { Op, Sequelize } = require("sequelize");
 
 app.use(express.json());

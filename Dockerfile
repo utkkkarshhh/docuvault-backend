@@ -14,5 +14,8 @@ COPY . .
 # Rebuild bcrypt
 RUN npm rebuild bcrypt --build-from-source
 
+# Expose the application port
+EXPOSE 8000
+
 # Your existing CMD or it will be overridden by docker-compose
 CMD ["npm", "run", "dev"]
