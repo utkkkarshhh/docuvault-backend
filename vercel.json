@@ -16,7 +16,6 @@
       }
     }
   ],
-  "installCommand": "npm install && cd node_modules/docuvault-database && npm install pg --save",
   "env": {
     "NODE_ENV": "production"
   }
