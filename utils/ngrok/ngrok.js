@@ -1,4 +1,5 @@
 const ngrok = require("ngrok");
+const env = require('../dotenvConfig')
 
 // Start Ngrok tunnel
 const startNgrokTunnel = async (port) => {
