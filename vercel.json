@@ -9,13 +9,14 @@
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "index.js",
+      "dest": "server.js",
       "methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
       "headers": {
         "Access-Control-Allow-Origin": "*"
       }
     }
   ],
+  "installCommand": "npm install && cd node_modules/docuvault-database && npm install pg --save",
   "env": {
     "NODE_ENV": "production"
   }

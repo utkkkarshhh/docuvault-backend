@@ -10,7 +10,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "build": "npm install && npm install pg",
+    "build": "rm -rf node_modules package-lock.json && npm cache clean --force && npm install && cd node_modules/docuvault-database && npm install pg@8.13.1 --save-exact",
     "ngrok": "npx ngrok http 9999"
   },
   "keywords": [],
@@ -22,7 +22,7 @@
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
-    "docuvault-database": "github:utkkkarshhh/docuvault-database",
+    "docuvault-database": "github:utkkkarshhh/docuvault-database#11b0cd8d47c631370454c421319b832d2a1e300e",
     "dotenv": "^16.4.5",
     "ejs": "^3.1.10",
     "express": "^4.19.2",
