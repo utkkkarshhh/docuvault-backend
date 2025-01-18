@@ -8,9 +8,8 @@ const authRoutes = require("./routes/authRouter/authRouter");
 const documentRoutes = require("./routes/documentRouter/documentRouter");
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./utils/swagger/swagger");
-// const { connectToSequelize } = require("./db/sequelizeConnection");
 const startNgrokTunnel = require("./utils/ngrok/ngrok");
-const {sequelize, models} = require("../database")
+const { sequelize } = require("docuvault-database");
 
 // Middlewares
 const app = express();
@@ -23,9 +22,12 @@ app.use(bodyParser.urlencoded({ extended: false }));
 // connectToSequelize();
 
 //Connect to Sequelize
-sequelize.authenticate().then(() => {
-  console.log('API Server connected to database');
-}).catch(console.error);
+sequelize
+  .authenticate()
+  .then(() => {
+    console.log("API Server connected to database");
+  })
+  .catch(console.error);
 
 if (process.env.ENIVRONMENT == "NGROK") {
   startNgrokTunnel(process.env.PORT);
@@ -48,6 +50,6 @@ app.use("/api/doc", documentRoutes);
 const PORT = process.env.PORT;
 app.listen(PORT, () => {
   console.log(
-    `App is live on port http://localhost:${PORT} | Environment : ${process.env.ENIVRONMENT}`
+    `App is live on port http://localhost:${PORT} | Environment : ${process.env.NODE_ENV}`
   );
 });

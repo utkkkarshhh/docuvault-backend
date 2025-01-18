@@ -1,10 +1,15 @@
 const express = require("express");
 const app = express();
 const { v4: uuidv4 } = require("uuid");
-const { sequelize } = require("../../db/sequelizeConnection");
-const Document = require("../../models/document")(sequelize);
-const UserLimit = require("../../models/userLimit")(sequelize);
-const UserLogin = require("../../models/userLogin")(sequelize);
+const {
+  sequelize,
+  models: {
+    userLogin: UserLogin,
+    userLimit: UserLimit,
+    documents: Document,
+    publicVisibility: PublicVisibilty,
+  },
+} = require("docuvault-database");
 const Messages = require("../../constants/Messages");
 const Constants = require("../../constants/Constants");
 const multer = require("multer");

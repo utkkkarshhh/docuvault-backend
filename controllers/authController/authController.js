@@ -3,14 +3,14 @@ const app = express();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { v4: uuidv4 } = require("uuid");
-const { sequelize } = require("../../db/sequelizeConnection");
 const Messages = require("../../constants/Messages");
 const Constant = require("../../constants/Constants");
-const UserLogin = require("../../models/userLogin")(sequelize);
-const UserDetails = require("../../models/userDetail")(sequelize);
-const UserLimit = require("../../models/userLimit")(sequelize);
-const PublicVisibilty =
-  require("../../models/publicVisibility")(sequelize);
+const { sequelize, models: { 
+  userLogin: UserLogin,
+  userDetail: UserDetails,
+  userLimit: UserLimit,
+  publicVisibility: PublicVisibilty 
+}} = require("docuvault-database");
 const { Op, Sequelize } = require("sequelize");
 
 app.use(express.json());
