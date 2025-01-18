@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const documentController = require("../../controllers/documentController/documentControllerFirebase");
 const documentConversionController = require("../../controllers/documentController/documentConversionController")
-const authenticateToken = require("../../utils/authentication/authenticateToken");
+const authenticateToken = require("../../middlewares/authenticateToken");
 
 /**
  * @swagger
