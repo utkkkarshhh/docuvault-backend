@@ -6,8 +6,7 @@ const {
   models: {
     userLogin: UserLogin,
     userLimit: UserLimit,
-    documents: Document,
-    publicVisibility: PublicVisibilty,
+    documents: Document
   },
 } = require("docuvault-database");
 const Messages = require("../../constants/Messages");
@@ -197,8 +196,9 @@ const getAllDocumentsForUser = async (req, res) => {
     });
   }
 
-  try {
-    const currentUser = await User.findByPk(user_id);
+  try { 
+    const currentUser = await UserLogin.findByPk(user_id);
+
     if (currentUser) {
       const documents = await Document.findAll({
         where: { user_id: currentUser.user_id },

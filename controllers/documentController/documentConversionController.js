@@ -3,6 +3,9 @@ const env = require("../../utils/dotenvConfig");
 const Constants = require("../../constants/Constants");
 const Messages = require("../../constants/Messages");
 const CircuitBreaker = require("opossum");
+const {
+  models: { documents: Document },
+} = require("docuvault-database");
 
 const CONVERSION_SERVICE_URL = process.env.CONVERSION_SERVICE_URL;
 const CONVERSION_TIMEOUT = parseInt(process.env.CONVERSION_SERVICE_TIMEOUT);
@@ -57,7 +60,7 @@ const convertDocument = async (req, res) => {
     `conv-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
   try {
-    const { document_id, user_id, format, metadata } = req.body;
+    const { document_id, user_id, format, convert_format } = req.body;
 
     if (!document_id || !format || !user_id) {
       return res.status(Constants.STATUS_CODES.BAD_REQUEST).json({
@@ -66,18 +69,28 @@ const convertDocument = async (req, res) => {
         correlationId,
       });
     }
+    // Ensure everything here and then send data to service
+    const document = await Document.findOne({
+      where: { id: document_id },
+    });
+
+    if (!document) {
+      return res.status(Constants.STATUS_CODES.NOT_FOUND).json({
+        success: false,
+        message: "Document not found",
+        correlationId,
+      });
+    }
 
     const documentData = {
-      document_id,
-      format,
-      metadata: metadata || {},
-      correlationId,
-      user_id,
+      document_id: document_id,
+      user_id: user_id,
+      format: format,
+      convert_format: convert_format,
+      correlationId: correlationId,
     };
 
-    console.log(
-      `[${correlationId}] Starting document conversion for document: ${document_id}`
-    );
+    // Making call to the microservice
     const result = await conversionBreaker.fire(documentData);
 
     // Check for fallback response
@@ -89,15 +102,7 @@ const convertDocument = async (req, res) => {
       });
     }
 
-    console.log(
-      `[${correlationId}] Document conversion completed successfully`
-    );
-
-    return res.status(200).json({
-      success: true,
-      data: result.data,
-      correlationId,
-    });
+    return res.status(200).json(result.data);
   } catch (error) {
     console.error(`[${correlationId}] Document conversion failed:`, error);
 

@@ -73,7 +73,7 @@ router.get("/userDetail/:user_id", authenticateToken, usersController.getAUser);
 
 /**
  * @swagger
- * /api/users/updateUser/{user_id}:
+ * /api/users/updateUserDetail/{user_id}:
  *   put:
  *     summary: Update an existing user by ID
  *     tags: [Users]

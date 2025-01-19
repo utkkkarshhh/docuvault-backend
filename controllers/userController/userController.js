@@ -1,9 +1,9 @@
 const express = require("express");
 const app = express();
-const { sequelize, models: { 
-  userLogin: UserLogin,
-  userDetail: UserDetails,
-}} = require("docuvault-database");
+const {
+  sequelize,
+  models: { userLogin: UserLogin, userDetail: UserDetails },
+} = require("docuvault-database");
 const Messages = require("../../constants/Messages");
 const Constants = require("../../constants/Constants");
 const { Op } = require("sequelize");
