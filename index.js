@@ -34,7 +34,8 @@ if (process.env.ENIVRONMENT == "NGROK") {
 }
 
 // Swagger UI setup
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+const options = { customCssUrl: 'views/public/swagger-ui.css', customSiteTitle: "CSS for Swagger" };
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, options));
 
 // Get on home route
 app.get("/", (req, res) => {
