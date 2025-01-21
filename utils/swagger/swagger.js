@@ -1,4 +1,4 @@
-const env = require('../dotenvConfig')
+const path = require("path");
 const swaggerJsDoc = require("swagger-jsdoc");
 
 const swaggerDefinition = {
@@ -57,7 +57,7 @@ const swaggerDefinition = {
             description: "User's email",
           },
         },
-        required: ["name", "email"],
+        required: [],
       },
       Error: {
         type: "object",
@@ -83,15 +83,18 @@ const swaggerDefinition = {
   },
   security: [
     {
-      BearerAuth: [], 
+      BearerAuth: [],
     },
   ],
 };
 
-
 const options = {
   definition: swaggerDefinition,
-  apis: ["./routes/authRouter/*.js", "./routes/userRouter/*.js", "./routes/documentRouter/*.js"],
+  apis: [
+    path.resolve(__dirname, "../../routes/authRouter/*.js"),
+    path.resolve(__dirname, "../../routes/userRouter/*.js"),
+    path.resolve(__dirname, "../../routes/documentRouter/*.js"),
+  ],
 };
 
 const swaggerSpec = swaggerJsDoc(options);

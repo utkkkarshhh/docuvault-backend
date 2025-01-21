@@ -25,9 +25,8 @@ const conversionBreaker = new CircuitBreaker(
       );
       return response;
     } catch (error) {
-      // Check if it's a specific error (e.g., 400) that shouldn't trigger fallback
       if (error.response && error.response.status === 400) {
-        throw error; // Allows it to be handled in `convertDocument` without fallback
+        throw error;
       }
       throw new Error("Service temporarily unavailable");
     }
@@ -40,7 +39,6 @@ const conversionBreaker = new CircuitBreaker(
   }
 );
 
-// Set up fallback specifically for unhandled errors (e.g., 503 Service Unavailable)
 conversionBreaker.fallback(() => ({
   error: "Conversion service temporarily unavailable",
   status: "SERVICE_UNAVAILABLE",
@@ -69,7 +67,6 @@ const convertDocument = async (req, res) => {
         correlationId,
       });
     }
-    // Ensure everything here and then send data to service
     const document = await Document.findOne({
       where: { id: document_id },
     });
@@ -93,7 +90,6 @@ const convertDocument = async (req, res) => {
     // Making call to the microservice
     const result = await conversionBreaker.fire(documentData);
 
-    // Check for fallback response
     if (result.data && result.data.status === "SERVICE_UNAVAILABLE") {
       return res.status(503).json({
         success: false,
@@ -101,7 +97,7 @@ const convertDocument = async (req, res) => {
         correlationId,
       });
     }
-
+    //Return the response received from microservice
     return res.status(200).json(result.data);
   } catch (error) {
     console.error(`[${correlationId}] Document conversion failed:`, error);
@@ -111,14 +107,10 @@ const convertDocument = async (req, res) => {
       correlationId,
       error: Messages.ERROR.CONVERSION_FAILED,
     };
-
-    // Handle specific error codes, e.g., 400
     if (error.response) {
       errorResponse.details = error.response.data;
       return res.status(error.response.status).json(errorResponse);
     }
-
-    // Fallback for unknown errors (500)
     return res.status(500).json(errorResponse);
   }
 };
