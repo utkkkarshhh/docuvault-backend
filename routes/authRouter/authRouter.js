@@ -154,4 +154,6 @@ router.post("/signin", authController.loginUser);
  */
 router.post("/signout", authenticateToken, authController.logoutUser);
 
+router.post("/forget_password", authController.forgetPassword);
+
 module.exports = router;
