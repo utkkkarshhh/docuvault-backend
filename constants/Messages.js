@@ -22,6 +22,7 @@ const Messages = {
     IDENTIFIER_REQUIRED: "Identifier(Username or Email) is required.",
     PASSWORD_MISSING: "Password field is missing.",
     EMAIL_OR_USERNAME_REQUIRED: "Email or Username required.",
+    EMAIL_OR_USERNAME_NOT_EXISTS: "Email or Username does not exists.",
     EMAIL_AND_USERNAME_REQUIRED: "Email and Username required.",
     NAME_EMAIL_REQUIRED: "Name and Email are required.",
     EMAIL_ALREADY_EXISTS: "Email already exists.",
