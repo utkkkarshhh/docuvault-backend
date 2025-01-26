@@ -13,9 +13,10 @@ const getUserLoginDetails = async (req, res) => {
 
     if (!userLoginObject) {
       return res
-        .response(Constants.STATUS_CODES.NOT_FOUND)
+        .status(Constants.STATUS_CODES.NOT_FOUND)
         .json({ message: Messages.USER.NO_USER_WITH_ID, success: false });
     }
+
     return res.status(Constants.STATUS_CODES.OK).json({
       success: true,
       data: {
@@ -25,7 +26,6 @@ const getUserLoginDetails = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error(Messages.GENERAL.ERROR_EXECUTING_QUERY, error.stack);
     return res
       .status(Constants.STATUS_CODES.INTERNAL_SERVER_ERROR)
       .json({ error: Messages.GENERAL.INTERNAL_SERVER, success: false });
