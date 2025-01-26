@@ -10,7 +10,6 @@ const { Op } = require("sequelize");
 
 app.use(express.json());
 
-// Get all users
 const getAllUsers = async (req, res) => {
   try {
     const users = await UserDetails.findAll();
@@ -32,7 +31,6 @@ const getAllUsers = async (req, res) => {
   }
 };
 
-// Get a single user by ID
 const getAUser = async (req, res) => {
   const { user_id } = req.params;
 
@@ -72,7 +70,6 @@ const getAUser = async (req, res) => {
   }
 };
 
-//  Update user By ID
 const updateUserDetail = async (req, res) => {
   const { user_id } = req.params;
   const { name, bio, dob } = req.body;
@@ -127,9 +124,35 @@ const updateUserDetail = async (req, res) => {
   }
 };
 
-// Update user login
+const getUserLoginDetails = async (req, res) => {
+  const { user_id } = req.params;
+
+  try {
+    const userLoginObject = await UserLogin.findOne({ where: { user_id } });
+
+    if (!userLoginObject) {
+      return res
+        .response(Constants.STATUS_CODES.NOT_FOUND)
+        .json({ message: Messages.USER.NO_USER_WITH_ID, success: false });
+    }
+    return res.reponse(Constants.STATUS_CODES.OK).json({
+      success: true,
+      data: {
+        email: userLoginObject.email,
+        username: userLoginObject.username,
+        is_subscribed_to_emails: userLoginObject.is_subscribed_to_emails,
+      },
+    });
+  } catch (error) {
+    console.error(Messages.GENERAL.ERROR_EXECUTING_QUERY, err.stack);
+    res
+      .status(Constants.STATUS_CODES.INTERNAL_SERVER_ERROR)
+      .json({ error: Messages.GENERAL.INTERNAL_SERVER, success: false });
+  }
+};
+
 const updateUserLogin = async (req, res) => {
-  const { username, email } = req.body;
+  const { username, email, is_subscribed_to_emails } = req.body;
   const { user_id } = req.params;
 
   // Validate input
@@ -157,7 +180,7 @@ const updateUserLogin = async (req, res) => {
 
     // Update UserDetails table
     const [updatedCount] = await UserLogin.update(
-      { username, email },
+      { username, email, is_subscribed_to_emails },
       {
         where: { user_id },
       }
@@ -184,7 +207,6 @@ const updateUserLogin = async (req, res) => {
   }
 };
 
-// Delete a user by ID
 const deleteAUser = async (req, res) => {
   const { user_id } = req.params;
 

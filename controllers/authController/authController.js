@@ -159,7 +159,7 @@ const loginUser = async (req, res) => {
     const token = jwt.sign(
       { user_id: user.user_id, username: user.username, email: user.email },
       process.env.JWT_SECRET,
-      { expiresIn: "1h" }
+      { expiresIn: "24h" }
     );
 
     res.cookie("access_token", token, {
@@ -242,12 +242,10 @@ const forgetPassword = async (req, res) => {
     }
   } catch (error) {
     console.error("Error during forget password:", error);
-    return res
-      .status(Constant.STATUS_CODES.INTERNAL_SERVER_ERROR)
-      .json({
-        success: false,
-        message: Messages.GENERAL.INTERNAL_SERVER,
-      });
+    return res.status(Constant.STATUS_CODES.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: Messages.GENERAL.INTERNAL_SERVER,
+    });
   }
 };
 

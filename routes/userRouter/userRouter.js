@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const usersController = require("../../controllers/userController/userController");
 const authenticateToken = require("../../middlewares/authenticateToken");
+const { getUserLoginDetails, updatePassword } = require("../../controllers");
 
 /**
  * @swagger
@@ -37,7 +38,7 @@ router.get("/users", authenticateToken, usersController.getAllUsers);
 
 /**
  * @swagger
- * /api/users/user/{user_id}:
+ * /api/users/userDetail/{user_id}:
  *   get:
  *     summary: Retrieve a single user by ID
  *     tags: [Users]
@@ -192,5 +193,13 @@ router.delete(
   authenticateToken,
   usersController.deleteAUser
 );
+
+router.get(
+  "/userLoginDetails/:user_id",
+  authenticateToken,
+  getUserLoginDetails
+);
+
+router.put("/updateUserPassword/:user_id", authenticateToken, updatePassword);
 
 module.exports = router;
