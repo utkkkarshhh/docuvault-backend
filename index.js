@@ -3,9 +3,7 @@ const path = require("path");
 const env = require("./utils/dotenvConfig");
 const bodyParser = require("body-parser");
 const cors = require("cors");
-const userRoutes = require("./routes/userRouter/userRouter");
-const authRoutes = require("./routes/authRouter/authRouter");
-const documentRoutes = require("./routes/documentRouter/documentRouter");
+const { authRoutes, userRoutes, documentRoutes } = require("./routes");
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./utils/swagger/swagger");
 const startNgrokTunnel = require("./utils/ngrok/ngrok");
@@ -34,7 +32,10 @@ if (process.env.ENIVRONMENT == "NGROK") {
 }
 
 // Swagger UI setup
-const options = { customCssUrl: './views/public/swagger-ui.css', customSiteTitle: "Swagger | Docuvault" };
+const options = {
+  customCssUrl: "./views/public/swagger-ui.css",
+  customSiteTitle: "Swagger | Docuvault",
+};
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, options));
 
 // Get on home route

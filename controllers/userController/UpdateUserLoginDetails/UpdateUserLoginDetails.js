@@ -6,6 +6,7 @@ const {
 } = require("docuvault-database");
 const Messages = require("../../../constants/Messages");
 const Constants = require("../../../constants/Constants");
+const { Op, Sequelize } = require("sequelize");
 
 app.use(express.json());
 

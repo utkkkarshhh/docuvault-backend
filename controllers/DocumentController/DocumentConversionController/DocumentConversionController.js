@@ -1,7 +1,7 @@
 const axios = require("axios");
-const env = require("../../utils/dotenvConfig");
-const Constants = require("../../constants/Constants");
-const Messages = require("../../constants/Messages");
+const env = require("../../../utils/dotenvConfig");
+const Constants = require("../../../constants/Constants");
+const Messages = require("../../../constants/Messages");
 const CircuitBreaker = require("opossum");
 const {
   models: { documents: Document },
@@ -115,6 +115,4 @@ const convertDocument = async (req, res) => {
   }
 };
 
-module.exports = {
-  convertDocument,
-};
+module.exports = convertDocument;

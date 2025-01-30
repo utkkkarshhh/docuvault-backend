@@ -91,9 +91,9 @@ const swaggerDefinition = {
 const options = {
   definition: swaggerDefinition,
   apis: [
-    path.resolve(__dirname, "../../routes/authRouter/*.js"),
-    path.resolve(__dirname, "../../routes/userRouter/*.js"),
-    path.resolve(__dirname, "../../routes/documentRouter/*.js"),
+    path.resolve(__dirname, "../../routes/AuthRoutes/*.js"),
+    path.resolve(__dirname, "../../routes/UserRoutes/*.js"),
+    path.resolve(__dirname, "../../routes/DocumentRoutes/*.js"),
   ],
 };
 
