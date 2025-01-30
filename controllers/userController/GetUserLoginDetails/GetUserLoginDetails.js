@@ -11,6 +11,12 @@ const getUserLoginDetails = async (req, res) => {
   try {
     const userLoginObject = await UserLogin.findOne({ where: { user_id } });
 
+    console.log(`--------${userLoginObject}----------`)
+    console.log(`--------${userLoginObject.email}----------`)
+    console.log(`--------${userLoginObject.username}----------`)
+    console.log(`--------${userLoginObject.is_subscribed_to_emails}----------`)
+    
+
     if (!userLoginObject) {
       return res
         .status(Constants.STATUS_CODES.NOT_FOUND)
