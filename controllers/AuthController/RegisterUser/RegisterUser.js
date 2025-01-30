@@ -74,6 +74,7 @@ const registerUser = async (req, res) => {
           email,
           username,
           password: hashedPassword,
+          is_subscribed_to_emails: true
         },
         { transaction }
       );
