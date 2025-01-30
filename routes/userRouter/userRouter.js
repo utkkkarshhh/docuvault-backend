@@ -1,8 +1,15 @@
 const express = require("express");
 const router = express.Router();
-const usersController = require("../../controllers/userController/userController");
 const authenticateToken = require("../../middlewares/authenticateToken");
-const { getUserLoginDetails, updatePassword } = require("../../controllers");
+const {
+  getUserLoginDetails,
+  updatePassword,
+  updateUserLogin,
+  getUserDetails,
+  updateUserDetail,
+  getAllUsers,
+  deleteUser
+} = require("../../controllers");
 
 /**
  * @swagger
@@ -34,7 +41,7 @@ const { getUserLoginDetails, updatePassword } = require("../../controllers");
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.get("/users", authenticateToken, usersController.getAllUsers);
+router.get("/users", authenticateToken, getAllUsers);
 
 /**
  * @swagger
@@ -70,7 +77,7 @@ router.get("/users", authenticateToken, usersController.getAllUsers);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.get("/userDetail/:user_id", authenticateToken, usersController.getAUser);
+router.get("/userDetail/:user_id", authenticateToken, getUserDetails);
 
 /**
  * @swagger
@@ -142,17 +149,9 @@ router.get("/userDetail/:user_id", authenticateToken, usersController.getAUser);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.put(
-  "/updateUserDetail/:user_id",
-  authenticateToken,
-  usersController.updateUserDetail
-);
+router.put("/updateUserDetail/:user_id", authenticateToken, updateUserDetail);
 
-router.put(
-  "/updateUserLogin/:user_id",
-  authenticateToken,
-  usersController.updateUserLogin
-);
+router.put("/updateUserLogin/:user_id", authenticateToken, updateUserLogin);
 
 /**
  * @swagger
@@ -188,11 +187,7 @@ router.put(
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.delete(
-  "/deleteUser/:user_id",
-  authenticateToken,
-  usersController.deleteAUser
-);
+router.delete("/deleteUser/:user_id", authenticateToken, deleteUser);
 
 router.get(
   "/userLoginDetails/:user_id",
