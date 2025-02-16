@@ -9,7 +9,10 @@ const getUserLoginDetails = async (req, res) => {
   const { user_id } = req.params;
 
   try {
-    const userLoginObject = await UserLogin.findOne({ where: { user_id } });
+    const userLoginObject = await UserLogin.findOne({
+      where: { user_id },
+      attributes: ["user_id", "email", "username", "is_subscribed_to_emails"],
+    });
     console.dir(userLoginObject, { depth: null });
 
     if (!userLoginObject) {
