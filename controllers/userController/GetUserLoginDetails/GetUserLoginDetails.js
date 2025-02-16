@@ -12,8 +12,8 @@ const getUserLoginDetails = async (req, res) => {
     const userLoginObject = await UserLogin.findOne({
       where: { user_id },
       attributes: ["user_id", "email", "username", "is_subscribed_to_emails"],
+      raw: true
     });
-    console.dir(userLoginObject, { depth: null });
 
     if (!userLoginObject) {
       return res
@@ -23,11 +23,7 @@ const getUserLoginDetails = async (req, res) => {
 
     return res.status(Constants.STATUS_CODES.OK).json({
       success: true,
-      data: {
-        email: userLoginObject.email,
-        username: userLoginObject.username,
-        is_subscribed_to_emails: userLoginObject.is_subscribed_to_emails,
-      },
+      data: userLoginObject,
     });
   } catch (error) {
     return res
