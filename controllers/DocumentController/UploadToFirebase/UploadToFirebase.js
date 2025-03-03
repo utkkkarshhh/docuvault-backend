@@ -47,7 +47,7 @@ const uploadToFirebase = async (req, res) => {
       });
     }
 
-    const uniqueFileName = `${uuidv4()}-${file.originalname}`;
+    const uniqueFileName = uuidv4();
     const storageRef = ref(storage, uniqueFileName);
     const fileFormat = file.originalname.split(".").pop();
 
@@ -62,7 +62,8 @@ const uploadToFirebase = async (req, res) => {
 
     const document = await Document.create({
       id: uuidv4(),
-      name,
+      upload_name: file.originalname,
+      unique_name: uniqueFileName,
       description,
       type,
       link: publicUrl,
