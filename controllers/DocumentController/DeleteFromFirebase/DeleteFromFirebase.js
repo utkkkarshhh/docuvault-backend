@@ -10,12 +10,11 @@ const { ref, deleteObject } = require("firebase/storage");
 const { storage } = require("../../../utils/firebase/firebase");
 
 const deleteFromFirebase = async (req, res) => {
-  const { document_id, user_id } = req.body;
-
-  const transaction = await sequelize.transaction(); // Start transaction
+  const { document_id } = req.body;
+  const { user_id } = req.user;
+  const transaction = await sequelize.transaction();
 
   try {
-    // Validate request
     if (!document_id || !user_id) {
       return res.status(Constants.STATUS_CODES.BAD_REQUEST).json({
         message: Messages.FIREBASE.ERROR.MISSING_FIELDS,
@@ -23,7 +22,6 @@ const deleteFromFirebase = async (req, res) => {
       });
     }
 
-    // Find the document in the database
     const document = await Document.findByPk(document_id, { transaction });
 
     if (!document) {
@@ -34,7 +32,6 @@ const deleteFromFirebase = async (req, res) => {
       });
     }
 
-    // Verify user ownership of the document
     if (document.user_id !== user_id) {
       await transaction.rollback();
       return res.status(Constants.STATUS_CODES.FORBIDDEN).json({
@@ -43,34 +40,39 @@ const deleteFromFirebase = async (req, res) => {
       });
     }
 
-    // Delete the file from Firebase Storage
-    const storageRef = ref(storage, document.link); // Ensure `document.link` is a valid file path
-    await deleteObject(storageRef).catch(async (err) => {
-      console.error("Error deleting file from Firebase:", err);
-      await transaction.rollback();
-      throw new Error(Messages.FIREBASE.ERROR.DELETION_FAILED);
-    });
+    try {
+      const storageRef = ref(storage, document.link);
+      await deleteObject(storageRef);
+    } catch (firebaseErr) {
+      if (firebaseErr.code === "storage/object-not-found") {
+        console.warn("Firebase file not found, proceeding with DB deletion.");
+      } else {
+        console.error("Unexpected Firebase error:", firebaseErr);
+        throw firebaseErr;
+      }
+    }
 
-    // Delete the document from the database
     await document.destroy({ transaction });
 
-    // Update the user's document limit
-    const currentUser = await UserLimit.findByPk(user_id, { transaction });
+    const currentUser = await UserLimit.findOne({
+      where: { user_id },
+      transaction,
+    });
+
     if (currentUser) {
       currentUser.limit += 1;
       await currentUser.save({ transaction });
     }
 
-    // Commit transaction
     await transaction.commit();
-
-    // Respond with success
     res.status(Constants.STATUS_CODES.OK).json({
       message: Messages.FIREBASE.SUCCESS.DELETED_SUCCESS,
       success: true,
     });
   } catch (error) {
-    await transaction.rollback(); // Roll back transaction on error
+    if (!transaction.finished) {
+      await transaction.rollback();
+    }
     console.error("Error in deleteFromFirebase:", error);
     res
       .status(Constants.STATUS_CODES.INTERNAL_SERVER_ERROR)
